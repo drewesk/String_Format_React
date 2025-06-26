@@ -1,35 +1,32 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from 'react';
 
-function App() {
-  const [count, setCount] = useState(0)
+function formatText(text) {
+  const boldReplaced = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  const blocks = boldReplaced.split(/\n{2,}/);
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+  return blocks
+    .map((block) => {
+      if (/^\* /.test(block.trim())) {
+        const listItems = block
+          .split('\n')
+          .map(line => line.match(/^\* (.*)/)?.[1])
+          .filter(Boolean)
+          .map(item => `<li>${item}</li>`)
+          .join('');
+        return `<ul>${listItems}</ul>`;
+      }
+
+      const withBreaks = block.replace(/\n/g, '<br />');
+      return `<p>${withBreaks}</p>`;
+    })
+    .join('');
 }
 
-export default App
+export default function AIResponse({ text }) {
+  return (
+    <div
+      className="prose"
+      dangerouslySetInnerHTML={{ __html: formatText(text) }}
+    />
+  );
+}
